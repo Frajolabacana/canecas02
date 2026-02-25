@@ -27,15 +27,16 @@
       device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="vid" src="https://drive.google.com/uc?export=download&id=1__kfOgtDv57nrcQIBnLRxRiBC-ZZONze" 
-               preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline>
+        <video id="vid" 
+               src="https://drive.google.com/uc?export=download&id=1__kfOgtDv57nrcQIBnLRxRiBC-ZZONze" 
+               preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline muted>
         </video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-video src="#vid" position="0 0 0" height="0.6" width="1" rotation="0 0 0"></a-video>
+        <a-video src="#vid" position="0 0 0" height="0.6" width="1"></a-video>
       </a-entity>
     </a-scene>
 
@@ -44,8 +45,9 @@
       const video = document.querySelector('#vid');
       
       btn.addEventListener('click', () => {
-        video.play(); // Acorda o vídeo
-        btn.style.display = 'none'; // Some o botão
+        video.muted = false; // Tira o mudo quando clica
+        video.play();
+        btn.style.display = 'none';
       });
     </script>
   </body>
