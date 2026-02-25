@@ -6,12 +6,17 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      #ui { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 80%; text-align: center; }
+      #ui { 
+        position: fixed; bottom: 20px; left: 50%; 
+        transform: translateX(-50%); z-index: 1000; 
+        width: 80%; text-align: center; 
+      }
       button { 
         padding: 15px 30px; border-radius: 30px; border: none; 
         background: #27ae60; color: white; font-weight: bold; 
-        font-family: sans-serif; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-        width: 100%; max-width: 250px;
+        font-family: sans-serif; cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 100%; max-width: 250px; font-size: 16px;
       }
       .aviso-expirado {
         background: rgba(0,0,0,0.9); color: white; padding: 20px;
@@ -51,29 +56,32 @@
     </a-scene>
 
     <script>
-      // === CONFIGURAÇÃO DO CLIENTE ===
-      const DATA_LIMITE = "2027-02-25"; // Data no formato AAAA-MM-DD
+      // ==========================================
+      // CONFIGURAÇÃO DO CLIENTE (Mude aqui)
+      const DATA_LIMITE = "2027-02-25"; 
       const MENSAGEM = "Esta experiência expirou em 25/02/2027. Entre em contato com a DigiArt para renovar!";
+      // ==========================================
       
       const btn = document.querySelector('#play-btn');
       const video = document.querySelector('#vid');
       const ui = document.querySelector('#ui');
 
-      // VERIFICAÇÃO DE DATA
+      // Lógica de Validade
       const hoje = new Date();
       const expiracao = new Date(DATA_LIMITE);
 
       if (hoje > expiracao) {
         ui.innerHTML = `<div class="aviso-expirado">${MENSAGEM}</div>`;
-        video.src = ""; // Mata o vídeo para não carregar
+        video.src = ""; 
       } else {
-        // Lógica normal de funcionamento
+        // Ativar Áudio e Play
         btn.addEventListener('click', () => {
           video.muted = false;
           video.play();
-          btn.style.display = 'none';
+          btn.style.display = 'none'; // Esconde o botão após clicar
         });
 
+        // Garantir que o vídeo rode ao detectar a caneca
         document.querySelector('a-scene').addEventListener('targetFound', () => {
           video.play();
         });
