@@ -18,7 +18,6 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
         width: 100%; max-width: 250px; font-size: 16px;
       }
-      /* Estilo para esconder o botão de VR que o A-Frame cria */
       .a-enter-vr { display: none !important; }
     </style>
   </head>
@@ -48,7 +47,7 @@
                  position="0 0 0" 
                  width="1" height="1.77" 
                  scale="1.5 1.5 1.5" 
-                 rotation="0 0 0">
+                 rotation="0 0 90">
         </a-video>
       </a-entity>
     </a-scene>
@@ -56,15 +55,25 @@
     <script>
       const btn = document.querySelector('#play-btn');
       const video = document.querySelector('#vid');
+      let isPlaying = false; // Trava para o som não sair antes
       
       btn.addEventListener('click', () => {
-        video.muted = false;
+        video.muted = false; // Desmuta apenas aqui
         video.play();
+        isPlaying = true;
         btn.style.display = 'none';
       });
 
+      // Só dá play no vídeo se o usuário já tiver apertado o botão de ativar
       document.querySelector('a-scene').addEventListener('targetFound', () => {
-        video.play();
+        if (isPlaying) {
+          video.play();
+        }
+      });
+
+      // Pausa o vídeo se o usuário tirar o celular da caneca (opcional, mas economiza bateria)
+      document.querySelector('a-scene').addEventListener('targetLost', () => {
+        video.pause();
       });
     </script>
   </body>
