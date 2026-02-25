@@ -30,7 +30,7 @@
         <a-video id="video-screen" src="#vid" 
                  position="0 0 0" 
                  width="1" height="1.77" 
-                 scale="1.4 1.4 1.4" 
+                 scale="1.2 1.2 1.2" 
                  rotation="0 0 0">
         </a-video>
       </a-entity>
@@ -39,13 +39,11 @@
     <script>
       const btn = document.querySelector('#play-btn');
       const video = document.querySelector('#vid');
-      
       btn.addEventListener('click', () => {
         video.muted = false;
         video.play();
         btn.style.display = 'none';
       });
-
       document.querySelector('a-scene').addEventListener('targetFound', () => {
         video.play();
       });
