@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      #ui { 
+        position: fixed; bottom: 30px; left: 50%; 
+        transform: translateX(-50%); z-index: 1000; 
+        width: 80%; text-align: center; 
+      }
+      button { 
+        padding: 15px 30px; border-radius: 30px; border: none; 
+        background: #27ae60; color: white; font-weight: bold; 
+        font-family: sans-serif; cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 100%; max-width: 250px; font-size: 16px;
+      }
+      .a-enter-vr { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div id="ui">
+      <button id="play-btn">ATIVAR MÁGICA ✨</button>
+    </div>
+    
+    <a-scene 
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
+      color-space="sRGB" 
+      renderer="colorManagement: true, physicallyCorrectLights" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <video id="vid" src="video.mp4" 
+               preload="auto" loop crossorigin="anonymous" 
+               playsinline webkit-playsinline muted>
+        </video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-video id="video-screen" src="#vid" 
+                 position="0 0 0" 
+                 width="1" height="1.77" 
+                 scale="1.5 1.5 1.5" 
+                 rotation="0 0 -90">
+        </a-video>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // CONFIGURAÇÃO DA TRAVA (Mude para cada cliente se quiser)
+      const DATA_LIMITE = "2027-02-25"; 
+
+      const btn = document.querySelector('#play-btn');
+      const video = document.querySelector('#vid');
+      let isPlaying = false; 
+
+      const hoje = new Date();
+      const expiracao = new Date(DATA_LIMITE);
+
+      if (hoje > expiracao) {
+        document.querySelector('#ui').innerHTML = "<div style='color:white; background:red; padding:10px;'>Link Expirado</div>";
+      } else {
+        btn.addEventListener('click', () => {
+          video.muted = false;
+          video.play();
+          isPlaying = true;
+          btn.style.display = 'none';
+        });
+
+        document.querySelector('a-scene').addEventListener('targetFound', () => {
+          if (isPlaying) video.play();
+        });
+
+        document.querySelector('a-scene').addEventListener('targetLost', () => {
+          video.pause();
+        });
+      }
+    </script>
+  </body>
+</html>
