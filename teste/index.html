@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[21:56, 25/02/2026] Maurício: <!DOCTYPE html>
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,81 +16,59 @@
         background: #27ae60; color: white; font-weight: bold; 
         font-family: sans-serif; cursor: pointer; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-        width: 100%; max-width: 250px; font-size: 18px;
+        width: 10…
+[22:05, 25/02/2026] Maurício: <!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      #ui { 
+        position: fixed; bottom: 30px; left: 50%; 
+        transform: translateX(-50%); z-index: 1000; 
+        width: 80%; text-align: center; 
       }
-      .a-enter-vr { display: none !important; }
-    </style>
-  </head>
-  <body>
-    <div id="ui">
-      <button id="play-btn">ATIVAR MÁGICA ✨</button>
-    </div>
+      button { 
+        padding: 15px 30px; border-radius: 30px; border: none; 
+        background: #27ae60; color: white; font-weight: bold; 
+        font-family: sans-serif; cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 10…
+[23:05, 25/02/2026] Maurício: <script>
+  const btn = document.querySelector('#play-btn');
+  const assets = document.querySelector('#assets-folder');
+  const videoScreen = document.querySelector('#video-screen');
+  let videoElement = null;
+  let buttonClicked = false; // Trava do botão
+
+  btn.addEventListener('click', () => {
+    // Cria o vídeo mas NÃO dá play ainda
+    videoElement = document.createElement('video');
+    videoElement.setAttribute('id', 'vid');
+    videoElement.setAttribute('src', 'magica.mp4'); 
+    videoElement.setAttribute('loop', 'true');
+    videoElement.setAttribute('crossorigin', 'anonymous');
+    videoElement.setAttribute('playsinline', 'true');
+    videoElement.setAttribute('webkit-playsinline', 'true');
     
-    <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-      color-space="sRGB" 
-      renderer="colorManagement: true, physicallyCorrectLights" 
-      vr-mode-ui="enabled: false" 
-      device-orientation-permission-ui="enabled: false">
-      
-      <a-assets id="assets-folder">
-        </a-assets>
+    assets.appendChild(videoElement);
+    videoScreen.setAttribute('src', '#vid');
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    videoElement.muted = false;
+    buttonClicked = true; // Libera para o alvo disparar o som
+    btn.style.display = 'none';
+  });
 
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-video id="video-screen" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5" rotation="0 0 0"></a-video>
-      </a-entity>
-    </a-scene>
+  // O ÚNICO lugar que dá o PLAY agora é aqui:
+  document.querySelector('a-scene').addEventListener('targetFound', () => {
+    if (buttonClicked && videoElement) {
+        videoElement.play(); // Só toca se o botão já foi clicado
+    }
+  });
 
-    <script>
-      const btn = document.querySelector('#play-btn');
-      const assets = document.querySelector('#assets-folder');
-      const videoScreen = document.querySelector('#video-screen');
-      let videoElement = null;
-
-      btn.addEventListener('click', () => {
-        // 1. Cria o elemento de vídeo do zero
-        videoElement = document.createElement('video');
-        videoElement.setAttribute('id', 'vid');
-        
-        // IMPORTANTE: O nome abaixo deve ser IGUAL ao arquivo no GitHub
-        videoElement.setAttribute('src', 'magica.mp4'); 
-        
-        videoElement.setAttribute('loop', 'true');
-        videoElement.setAttribute('crossorigin', 'anonymous');
-        videoElement.setAttribute('playsinline', 'true');
-        videoElement.setAttribute('webkit-playsinline', 'true');
-        
-        // 2. Adiciona aos assets
-        assets.appendChild(videoElement);
-        
-        // 3. Conecta à tela de RA
-        videoScreen.setAttribute('src', '#vid');
-
-        // 4. Libera o som e dá play
-        videoElement.muted = false;
-        videoElement.play().then(() => {
-            console.log("Vídeo iniciado com sucesso");
-            btn.style.display = 'none';
-        }).catch(err => {
-            console.log("Aguardando interação ou alvo");
-            btn.style.display = 'none';
-        });
-      });
-
-      // Controle de aparecer/sumir na caneca
-      document.querySelector('a-scene').addEventListener('targetFound', () => {
-        if (videoElement) {
-            videoElement.play();
-        }
-      });
-
-      document.querySelector('a-scene').addEventListener('targetLost', () => {
-        if (videoElement) {
-            videoElement.pause();
-        }
-      });
-    </script>
-  </body>
-</html>
+  document.querySelector('a-scene').addEventListener('targetLost', () => {
+    if (videoElement) videoElement.pause();
+  });
+</script>
