@@ -36,7 +36,7 @@
       <a-assets>
         <video id="vid" src="video.mp4" 
                preload="auto" loop crossorigin="anonymous" 
-               playsinline webkit-playsinline muted>
+               playsinline webkit-playsinline muted="true">
         </video>
       </a-assets>
 
@@ -55,19 +55,26 @@
     <script>
       const btn = document.querySelector('#play-btn');
       const video = document.querySelector('#vid');
-      let isPlaying = false; 
+      let magicActivated = false; 
+
+      // Garante que o vídeo comece pausado e mudo assim que a página abre
+      video.pause();
+      video.muted = true;
 
       btn.addEventListener('click', () => {
+        // A Mágica acontece aqui: só agora liberamos o som e o play
         video.muted = false;
         video.play();
-        isPlaying = true;
+        magicActivated = true;
         btn.style.display = 'none';
       });
 
       document.querySelector('a-scene').addEventListener('targetFound', () => {
-        // SÓ dá play se o botão já tiver sido clicado!
-        if (isPlaying) {
+        // Só toca se o botão já foi apertado E se a caneca for vista
+        if (magicActivated) {
           video.play();
+        } else {
+          video.pause(); // Força a pausa se a caneca aparecer sem o clique
         }
       });
 
