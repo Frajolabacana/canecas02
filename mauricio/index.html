@@ -34,10 +34,7 @@
       device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="vid" src="video.mp4" 
-               preload="auto" loop crossorigin="anonymous" 
-               playsinline webkit-playsinline muted="true">
-        </video>
+        <video id="vid" loop crossorigin="anonymous" playsinline webkit-playsinline muted></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -57,24 +54,26 @@
       const video = document.querySelector('#vid');
       let magicActivated = false; 
 
-      // Garante que o vídeo comece pausado e mudo assim que a página abre
-      video.pause();
-      video.muted = true;
-
       btn.addEventListener('click', () => {
-        // A Mágica acontece aqui: só agora liberamos o som e o play
+        // Só agora dizemos qual é o arquivo de vídeo
+        video.src = "video.mp4"; 
+        video.load(); // Carrega o vídeo agora
         video.muted = false;
-        video.play();
-        magicActivated = true;
-        btn.style.display = 'none';
+        
+        // Tenta dar o play. Se a caneca já estiver na frente, ele começa.
+        video.play().then(() => {
+            magicActivated = true;
+            btn.style.display = 'none';
+        }).catch(err => {
+            // Caso o navegador bloqueie, o botão some e a mágica ativa para quando o alvo aparecer
+            magicActivated = true;
+            btn.style.display = 'none';
+        });
       });
 
       document.querySelector('a-scene').addEventListener('targetFound', () => {
-        // Só toca se o botão já foi apertado E se a caneca for vista
         if (magicActivated) {
           video.play();
-        } else {
-          video.pause(); // Força a pausa se a caneca aparecer sem o clique
         }
       });
 
