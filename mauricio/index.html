@@ -47,40 +47,33 @@
                  position="0 0 0" 
                  width="1" height="1.77" 
                  scale="1.5 1.5 1.5" 
-                 rotation="0 0 -90">
+                 rotation="0 0 0">
         </a-video>
       </a-entity>
     </a-scene>
 
     <script>
-      // CONFIGURAÇÃO DA TRAVA (Mude para cada cliente se quiser)
-      const DATA_LIMITE = "2027-02-25"; 
-
       const btn = document.querySelector('#play-btn');
       const video = document.querySelector('#vid');
       let isPlaying = false; 
 
-      const hoje = new Date();
-      const expiracao = new Date(DATA_LIMITE);
+      btn.addEventListener('click', () => {
+        video.muted = false;
+        video.play();
+        isPlaying = true;
+        btn.style.display = 'none';
+      });
 
-      if (hoje > expiracao) {
-        document.querySelector('#ui').innerHTML = "<div style='color:white; background:red; padding:10px;'>Link Expirado</div>";
-      } else {
-        btn.addEventListener('click', () => {
-          video.muted = false;
+      document.querySelector('a-scene').addEventListener('targetFound', () => {
+        // SÓ dá play se o botão já tiver sido clicado!
+        if (isPlaying) {
           video.play();
-          isPlaying = true;
-          btn.style.display = 'none';
-        });
+        }
+      });
 
-        document.querySelector('a-scene').addEventListener('targetFound', () => {
-          if (isPlaying) video.play();
-        });
-
-        document.querySelector('a-scene').addEventListener('targetLost', () => {
-          video.pause();
-        });
-      }
+      document.querySelector('a-scene').addEventListener('targetLost', () => {
+        video.pause();
+      });
     </script>
   </body>
 </html>
