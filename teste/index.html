@@ -16,7 +16,7 @@
         background: #27ae60; color: white; font-weight: bold; 
         font-family: sans-serif; cursor: pointer; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-        width: 100%; max-width: 250px; font-size: 16px;
+        width: 100%; max-width: 250px; font-size: 18px;
       }
       .a-enter-vr { display: none !important; }
     </style>
@@ -50,34 +50,46 @@
       let videoElement = null;
 
       btn.addEventListener('click', () => {
-        // Criamos o elemento de vídeo do zero agora!
+        // 1. Cria o elemento de vídeo do zero
         videoElement = document.createElement('video');
         videoElement.setAttribute('id', 'vid');
-        videoElement.setAttribute('src', 'video.mp4');
+        
+        // IMPORTANTE: O nome abaixo deve ser IGUAL ao arquivo no GitHub
+        videoElement.setAttribute('src', 'magica.mp4'); 
+        
         videoElement.setAttribute('loop', 'true');
         videoElement.setAttribute('crossorigin', 'anonymous');
         videoElement.setAttribute('playsinline', 'true');
         videoElement.setAttribute('webkit-playsinline', 'true');
         
-        // Adiciona ao sistema
+        // 2. Adiciona aos assets
         assets.appendChild(videoElement);
         
-        // Conecta o vídeo à tela da Realidade Aumentada
+        // 3. Conecta à tela de RA
         videoScreen.setAttribute('src', '#vid');
 
-        // Dá o play com som
+        // 4. Libera o som e dá play
         videoElement.muted = false;
-        videoElement.play();
-        
-        btn.style.display = 'none';
+        videoElement.play().then(() => {
+            console.log("Vídeo iniciado com sucesso");
+            btn.style.display = 'none';
+        }).catch(err => {
+            console.log("Aguardando interação ou alvo");
+            btn.style.display = 'none';
+        });
       });
 
+      // Controle de aparecer/sumir na caneca
       document.querySelector('a-scene').addEventListener('targetFound', () => {
-        if (videoElement) videoElement.play();
+        if (videoElement) {
+            videoElement.play();
+        }
       });
 
       document.querySelector('a-scene').addEventListener('targetLost', () => {
-        if (videoElement) videoElement.pause();
+        if (videoElement) {
+            videoElement.pause();
+        }
       });
     </script>
   </body>
