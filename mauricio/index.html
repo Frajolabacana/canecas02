@@ -33,52 +33,51 @@
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
       
-      <a-assets>
-        <video id="vid" loop crossorigin="anonymous" playsinline webkit-playsinline muted></video>
-      </a-assets>
+      <a-assets id="assets-folder">
+        </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0">
-        <a-video id="video-screen" src="#vid" 
-                 position="0 0 0" 
-                 width="1" height="1.77" 
-                 scale="1.5 1.5 1.5" 
-                 rotation="0 0 0">
-        </a-video>
+        <a-video id="video-screen" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5" rotation="0 0 0"></a-video>
       </a-entity>
     </a-scene>
 
     <script>
       const btn = document.querySelector('#play-btn');
-      const video = document.querySelector('#vid');
-      let magicActivated = false; 
+      const assets = document.querySelector('#assets-folder');
+      const videoScreen = document.querySelector('#video-screen');
+      let videoElement = null;
 
       btn.addEventListener('click', () => {
-        // Só agora dizemos qual é o arquivo de vídeo
-        video.src = "video.mp4"; 
-        video.load(); // Carrega o vídeo agora
-        video.muted = false;
+        // Criamos o elemento de vídeo do zero agora!
+        videoElement = document.createElement('video');
+        videoElement.setAttribute('id', 'vid');
+        videoElement.setAttribute('src', 'video.mp4');
+        videoElement.setAttribute('loop', 'true');
+        videoElement.setAttribute('crossorigin', 'anonymous');
+        videoElement.setAttribute('playsinline', 'true');
+        videoElement.setAttribute('webkit-playsinline', 'true');
         
-        // Tenta dar o play. Se a caneca já estiver na frente, ele começa.
-        video.play().then(() => {
-            magicActivated = true;
-            btn.style.display = 'none';
-        }).catch(err => {
-            // Caso o navegador bloqueie, o botão some e a mágica ativa para quando o alvo aparecer
-            magicActivated = true;
-            btn.style.display = 'none';
-        });
+        // Adiciona ao sistema
+        assets.appendChild(videoElement);
+        
+        // Conecta o vídeo à tela da Realidade Aumentada
+        videoScreen.setAttribute('src', '#vid');
+
+        // Dá o play com som
+        videoElement.muted = false;
+        videoElement.play();
+        
+        btn.style.display = 'none';
       });
 
       document.querySelector('a-scene').addEventListener('targetFound', () => {
-        if (magicActivated) {
-          video.play();
-        }
+        if (videoElement) videoElement.play();
       });
 
       document.querySelector('a-scene').addEventListener('targetLost', () => {
-        video.pause();
+        if (videoElement) videoElement.pause();
       });
     </script>
   </body>
