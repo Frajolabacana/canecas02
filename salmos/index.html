@@ -8,8 +8,8 @@
         body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         #container { width: 100%; max-width: 400px; display: none; }
         video { width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        #tutorial, #expirado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
-        button { background-color: #25D366; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 25px; cursor: pointer; margin-top: 20px; text-decoration: none; font-weight: bold; }
+        #tutorial, #expirado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
+        button { background-color: #25D366; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 30px; cursor: pointer; margin-top: 30px; text-decoration: none; font-weight: bold; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -18,7 +18,7 @@
     <div id="tutorial">
         <h2>Bem-vindo! ☕📖</h2>
         <p>Aponte a câmera para a caneca e assista sua mensagem diária de fé.</p>
-        <button id="btnEntendi">CLIQUE AQUI PARA VER</button>
+        <button onclick="iniciarSistema()">CLIQUE AQUI PARA VER</button>
     </div>
 
     <div id="expirado" class="hidden">
@@ -29,7 +29,7 @@
 
     <div id="container">
         <video id="meuVideo" controls playsinline>
-            <source src="" type="video/mp4">
+            <source src="1.mp4" type="video/mp4">
             Seu navegador não suporta vídeos.
         </video>
     </div>
@@ -40,12 +40,11 @@
         const DIAS_PARA_EXPIRAR = 30;
         // ------------------------------
 
-        const videoPlayer = document.getElementById('meuVideo');
         const container = document.getElementById('container');
         const tutorial = document.getElementById('tutorial');
         const expirado = document.getElementById('expirado');
         const btnRenovar = document.getElementById('btnRenovar');
-        const btnEntendi = document.getElementById('btnEntendi');
+        const videoPlayer = document.getElementById('meuVideo');
 
         window.onload = function() {
             verificarStatus();
@@ -54,10 +53,8 @@
 
         function verificarStatus() {
             let dataInicio = localStorage.getItem('dataInicio');
-            if (!dataInicio) {
-                tutorial.style.display = 'flex';
-                container.style.display = 'none';
-            } else {
+            if (dataInicio) {
+                // Já iniciou antes, pula tutorial
                 tutorial.style.display = 'none';
                 
                 let agora = new Date().getTime();
@@ -70,27 +67,21 @@
                 }
                 
                 container.style.display = 'block';
-                // --- TESTE: USANDO APENAS O VÍDEO 1 ---
-                carregarVideoTeste();
             }
         }
 
-        btnEntendi.onclick = function() {
-            if (!localStorage.getItem('dataInicio')) {
-                localStorage.setItem('dataInicio', new Date().getTime());
-            }
+        // --- FUNÇÃO DO BOTÃO DIRETA ---
+        function iniciarSistema() {
+            // Salva a data de início
+            localStorage.setItem('dataInicio', new Date().getTime());
             
+            // Esconde tutorial, mostra vídeo
             tutorial.style.display = 'none';
             container.style.display = 'block';
-            // --- TESTE: USANDO APENAS O VÍDEO 1 ---
-            carregarVideoTeste();
-            videoPlayer.play();
-        };
-
-        function carregarVideoTeste() {
-            // FORÇA O VÍDEO 1 PARA NÃO DAR ERRO
-            videoPlayer.src = 1.mp4; 
+            
+            // Força carregar e dar play
             videoPlayer.load();
+            videoPlayer.play();
         }
 
         // Blindagem de Áudio
