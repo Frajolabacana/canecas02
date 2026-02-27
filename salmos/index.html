@@ -36,7 +36,7 @@
 
     <script>
         // --- CONFIGURAÇÕES ---
-        const WHATSAPP_NUMBER = "5524993148000"; // <--- SEU NÚMERO AQUI
+        const WHATSAPP_NUMBER = "5524993148000";
         const DIAS_PARA_EXPIRAR = 30;
         // ------------------------------
 
@@ -49,21 +49,17 @@
 
         window.onload = function() {
             verificarStatus();
-            
-            // Link do WhatsApp
             btnRenovar.href = https://wa.me/${WHATSAPP_NUMBER}?text=Olá!%20Quero%20renovar%20minha%20assinatura%20da%20Caneca%20Devocional.;
         };
 
         function verificarStatus() {
             let dataInicio = localStorage.getItem('dataInicio');
             if (!dataInicio) {
-                // Primeira vez: tutorial ativo
                 tutorial.style.display = 'flex';
                 container.style.display = 'none';
             } else {
                 tutorial.style.display = 'none';
                 
-                // Verifica 30 dias
                 let agora = new Date().getTime();
                 let limite = parseInt(dataInicio) + (DIAS_PARA_EXPIRAR * 24 * 60 * 60 * 1000);
                 
@@ -73,31 +69,27 @@
                     return;
                 }
                 
-                // Dentro do prazo
                 container.style.display = 'block';
-                carregarVideoDoDia();
+                // --- TESTE: USANDO APENAS O VÍDEO 1 ---
+                carregarVideoTeste();
             }
         }
 
-        // Função do Botão Corrigida
         btnEntendi.onclick = function() {
-            // Salva a data apenas no clique
             if (!localStorage.getItem('dataInicio')) {
                 localStorage.setItem('dataInicio', new Date().getTime());
             }
             
             tutorial.style.display = 'none';
             container.style.display = 'block';
-            carregarVideoDoDia();
-            videoPlayer.play(); // Tenta dar play automático
+            // --- TESTE: USANDO APENAS O VÍDEO 1 ---
+            carregarVideoTeste();
+            videoPlayer.play();
         };
 
-        function carregarVideoDoDia() {
-            let dia = new Date().getDay(); // 0-6
-            let numeroVideo = dia + 1; // 1-7
-            
-            // Carrega o vídeo baseado no dia
-            videoPlayer.src = ${numeroVideo}.mp4; 
+        function carregarVideoTeste() {
+            // FORÇA O VÍDEO 1 PARA NÃO DAR ERRO
+            videoPlayer.src = 1.mp4; 
             videoPlayer.load();
         }
 
