@@ -1,70 +1,124 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caneca Devocional AR</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        body { margin: 0; }
-        #tutorial, #expirado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; padding: 20px; text-align: center; }
-        button { background-color: #25D366; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 30px; cursor: pointer; font-weight: bold; }
-        .hidden { display: none !important; }
+      body { margin: 0; overflow: hidden; }
+      #ui { 
+        position: fixed; bottom: 30px; left: 50%; 
+        transform: translateX(-50%); z-index: 1000; 
+        width: 80%; text-align: center; 
+      }
+      button { 
+        padding: 15px 30px; border-radius: 30px; border: none; 
+        background: #27ae60; color: white; font-weight: bold; 
+        font-family: sans-serif; cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 100%; max-width: 250px; font-size: 18px;
+      }
+      .a-enter-vr { display: none !important; }
+      #mensagem-erro {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); color: white; display: none;
+        align-items: center; justify-content: center; z-index: 2000;
+        font-family: sans-serif; text-align: center; padding: 20px;
+      }
     </style>
-</head>
-<body>
-
-    <div id="tutorial">
-        <h2>Bem-vindo! ☕📖</h2>
-        <p>Aponte a câmera para a caneca para assistir sua mensagem diária.</p>
-        <button onclick="iniciarAR()">CLIQUE AQUI PARA VER</button>
+  </head>
+  <body>
+    <div id="mensagem-erro">
+      <h2>Sua assinatura expirou.</h2>
+      <p>O prazo de 30 dias terminou.</p>
     </div>
 
-    <div id="expirado" class="hidden">
-        <h2>Assinatura Expirada 🔒</h2>
-        <p>Renove para continuar recebendo a palavra diária.</p>
-        <a id="btnRenovar" href="#" target="_blank"><button>RENOVAR NO WHATSAPP</button></a>
+    <div id="ui">
+      <button id="play-btn">ATIVAR MÁGICA ✨</button>
     </div>
+    
+    <a-scene 
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
+      color-space="sRGB" 
+      renderer="colorManagement: true, physicallyCorrectLights" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-assets id="assets-folder"></a-assets>
 
-    <a-scene id="scene" mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" class="hidden">
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-        <a-entity id="target" mindar-image-target="targetIndex: 0">
-            <a-video id="videoElement" src="#video" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
-        </a-entity>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-video id="video-screen" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5" rotation="0 0 0"></a-video>
+      </a-entity>
     </a-scene>
 
     <script>
-        const WHATSAPP_NUMBER = "5524993148000";
-        const DIAS_PARA_EXPIRAR = 30;
+      const btn = document.querySelector('#play-btn');
+      const assets = document.querySelector('#assets-folder');
+      const videoScreen = document.querySelector('#video-screen');
+      const mensagemErro = document.querySelector('#mensagem-erro');
+      let videoElement = null;
+      let autorizado = false;
+      
+      // --- CONFIGURAÇÃO DE TEMPO ---
+      const DIAS_LIMITE = 30;
+      // -----------------------------
 
-        function iniciarAR() {
-            // Lógica de tempo (mesma de antes)
-            let dataInicio = localStorage.getItem('dataInicio');
-            if (!dataInicio) {
-                localStorage.setItem('dataInicio', new Date().getTime());
-            } else {
-                let agora = new Date().getTime();
-                let limite = parseInt(dataInicio) + (DIAS_PARA_EXPIRAR * 24 * 60 * 60 * 1000);
-                if (agora > limite) {
-                    document.getElementById('tutorial').classList.add('hidden');
-                    document.getElementById('expirado').classList.remove('hidden');
-                    document.getElementById('btnRenovar').href = https://wa.me/${WHATSAPP_NUMBER}?text=Olá!%20Quero%20renovar%20minha%20assinatura.;
-                    return;
-                }
-            }
-
-            // Inicia a câmera e o vídeo
-            document.getElementById('tutorial').classList.add('hidden');
-            document.getElementById('scene').classList.remove('hidden');
-            
-            const scene = document.querySelector('a-scene');
-            const arSystem = scene.systems["mindar-image-system"];
-            arSystem.start(); // Inicia a AR
-            
-            const video = document.getElementById('videoElement');
-            // Nota: Para AR, o vídeo precisa estar num asset e carregar corretamente. 
-            // Este código assume que o vídeo 1.mp4 é o padrão de teste.
+      function verificarValidade() {
+        let dataInicio = localStorage.getItem('dataInicio');
+        if (!dataInicio) {
+          localStorage.setItem('dataInicio', new Date().getTime());
+        } else {
+          let agora = new Date().getTime();
+          let limite = parseInt(dataInicio) + (DIAS_LIMITE * 24 * 60 * 60 * 1000);
+          if (agora > limite) {
+            mensagemErro.style.display = 'flex';
+            document.querySelector('#ui').style.display = 'none';
+            return false;
+          }
         }
+        return true;
+      }
+
+      function definirVideoDoDia() {
+        let dia = new Date().getDay(); // 0 (Dom) - 6 (Sab)
+        let videoNome = (dia + 1) + ".mp4"; // 1.mp4 - 7.mp4
+        return videoNome;
+      }
+
+      btn.addEventListener('click', () => {
+        if (!verificarValidade()) return;
+
+        videoElement = document.createElement('video');
+        videoElement.setAttribute('id', 'vid');
+        
+        // --- CHAMA O VÍDEO DO DIA ---
+        videoElement.setAttribute('src', definirVideoDoDia()); 
+        // -----------------------------
+
+        videoElement.setAttribute('loop', 'true');
+        videoElement.setAttribute('crossorigin', 'anonymous');
+        videoElement.setAttribute('playsinline', 'true');
+        videoElement.setAttribute('webkit-playsinline', 'true');
+        
+        assets.appendChild(videoElement);
+        videoScreen.setAttribute('src', '#vid');
+
+        videoElement.muted = false;
+        autorizado = true; 
+        btn.style.display = 'none';
+      });
+
+      document.querySelector('a-scene').addEventListener('targetFound', () => {
+        if (autorizado && videoElement) {
+          videoElement.play();
+        }
+      });
+
+      document.querySelector('a-scene').addEventListener('targetLost', () => {
+        if (videoElement) videoElement.pause();
+      });
     </script>
-</body>
+  </body>
 </html>
