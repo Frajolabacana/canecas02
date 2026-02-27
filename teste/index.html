@@ -19,9 +19,20 @@
         width: 100%; max-width: 250px; font-size: 18px;
       }
       .a-enter-vr { display: none !important; }
+      #mensagem-erro {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9); color: white; display: none;
+        align-items: center; justify-content: center; z-index: 2000;
+        font-family: sans-serif; text-align: center; padding: 20px;
+      }
     </style>
   </head>
   <body>
+    <div id="mensagem-erro">
+      <h2>Sua assinatura expirou.</h2>
+      <p>O prazo de 30 dias terminou.</p>
+    </div>
+
     <div id="ui">
       <button id="play-btn">ATIVAR MÁGICA ✨</button>
     </div>
@@ -46,13 +57,46 @@
       const btn = document.querySelector('#play-btn');
       const assets = document.querySelector('#assets-folder');
       const videoScreen = document.querySelector('#video-screen');
+      const mensagemErro = document.querySelector('#mensagem-erro');
       let videoElement = null;
       let autorizado = false;
+      
+      // --- CONFIGURAÇÃO DE TEMPO ---
+      const DIAS_LIMITE = 30;
+      // -----------------------------
+
+      function verificarValidade() {
+        let dataInicio = localStorage.getItem('dataInicio');
+        if (!dataInicio) {
+          localStorage.setItem('dataInicio', new Date().getTime());
+        } else {
+          let agora = new Date().getTime();
+          let limite = parseInt(dataInicio) + (DIAS_LIMITE * 24 * 60 * 60 * 1000);
+          if (agora > limite) {
+            mensagemErro.style.display = 'flex';
+            document.querySelector('#ui').style.display = 'none';
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function definirVideoDoDia() {
+        let dia = new Date().getDay(); // 0 (Dom) - 6 (Sab)
+        let videoNome = (dia + 1) + ".mp4"; // 1.mp4 - 7.mp4
+        return videoNome;
+      }
 
       btn.addEventListener('click', () => {
+        if (!verificarValidade()) return;
+
         videoElement = document.createElement('video');
         videoElement.setAttribute('id', 'vid');
-        videoElement.setAttribute('src', 'magica.mp4'); 
+        
+        // --- CHAMA O VÍDEO DO DIA ---
+        videoElement.setAttribute('src', definirVideoDoDia()); 
+        // -----------------------------
+
         videoElement.setAttribute('loop', 'true');
         videoElement.setAttribute('crossorigin', 'anonymous');
         videoElement.setAttribute('playsinline', 'true');
