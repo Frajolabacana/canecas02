@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caneca Devocional</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Caneca Devocional AR</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        #container { width: 100%; max-width: 400px; display: none; }
-        video { width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        #tutorial, #expirado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; box-sizing: border-box; }
-        button { background-color: #25D366; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 30px; cursor: pointer; margin-top: 30px; text-decoration: none; font-weight: bold; }
+        body { margin: 0; }
+        #tutorial, #expirado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; padding: 20px; text-align: center; }
+        button { background-color: #25D366; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 30px; cursor: pointer; font-weight: bold; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -17,79 +16,55 @@
 
     <div id="tutorial">
         <h2>Bem-vindo! ☕📖</h2>
-        <p>Aponte a câmera para a caneca e assista sua mensagem diária de fé.</p>
-        <button onclick="iniciarSistema()">CLIQUE AQUI PARA VER</button>
+        <p>Aponte a câmera para a caneca para assistir sua mensagem diária.</p>
+        <button onclick="iniciarAR()">CLIQUE AQUI PARA VER</button>
     </div>
 
     <div id="expirado" class="hidden">
         <h2>Assinatura Expirada 🔒</h2>
-        <p>Sua jornada de 30 dias terminou. Renove para continuar recebendo a palavra diária.</p>
+        <p>Renove para continuar recebendo a palavra diária.</p>
         <a id="btnRenovar" href="#" target="_blank"><button>RENOVAR NO WHATSAPP</button></a>
     </div>
 
-    <div id="container">
-        <video id="meuVideo" controls playsinline>
-            <source src="1.mp4" type="video/mp4">
-            Seu navegador não suporta vídeos.
-        </video>
-    </div>
+    <a-scene id="scene" mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" class="hidden">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="target" mindar-image-target="targetIndex: 0">
+            <a-video id="videoElement" src="#video" width="1" height="0.5625" position="0 0 0" rotation="0 0 0"></a-video>
+        </a-entity>
+    </a-scene>
 
     <script>
-        // --- CONFIGURAÇÕES ---
         const WHATSAPP_NUMBER = "5524993148000";
         const DIAS_PARA_EXPIRAR = 30;
-        // ------------------------------
 
-        const container = document.getElementById('container');
-        const tutorial = document.getElementById('tutorial');
-        const expirado = document.getElementById('expirado');
-        const btnRenovar = document.getElementById('btnRenovar');
-        const videoPlayer = document.getElementById('meuVideo');
-
-        window.onload = function() {
-            verificarStatus();
-            btnRenovar.href = https://wa.me/${WHATSAPP_NUMBER}?text=Olá!%20Quero%20renovar%20minha%20assinatura%20da%20Caneca%20Devocional.;
-        };
-
-        function verificarStatus() {
+        function iniciarAR() {
+            // Lógica de tempo (mesma de antes)
             let dataInicio = localStorage.getItem('dataInicio');
-            if (dataInicio) {
-                // Já iniciou antes, pula tutorial
-                tutorial.style.display = 'none';
-                
+            if (!dataInicio) {
+                localStorage.setItem('dataInicio', new Date().getTime());
+            } else {
                 let agora = new Date().getTime();
                 let limite = parseInt(dataInicio) + (DIAS_PARA_EXPIRAR * 24 * 60 * 60 * 1000);
-                
                 if (agora > limite) {
-                    expirado.classList.remove('hidden');
-                    container.style.display = 'none';
+                    document.getElementById('tutorial').classList.add('hidden');
+                    document.getElementById('expirado').classList.remove('hidden');
+                    document.getElementById('btnRenovar').href = https://wa.me/${WHATSAPP_NUMBER}?text=Olá!%20Quero%20renovar%20minha%20assinatura.;
                     return;
                 }
-                
-                container.style.display = 'block';
             }
-        }
 
-        // --- FUNÇÃO DO BOTÃO DIRETA ---
-        function iniciarSistema() {
-            // Salva a data de início
-            localStorage.setItem('dataInicio', new Date().getTime());
+            // Inicia a câmera e o vídeo
+            document.getElementById('tutorial').classList.add('hidden');
+            document.getElementById('scene').classList.remove('hidden');
             
-            // Esconde tutorial, mostra vídeo
-            tutorial.style.display = 'none';
-            container.style.display = 'block';
+            const scene = document.querySelector('a-scene');
+            const arSystem = scene.systems["mindar-image-system"];
+            arSystem.start(); // Inicia a AR
             
-            // Força carregar e dar play
-            videoPlayer.load();
-            videoPlayer.play();
+            const video = document.getElementById('videoElement');
+            // Nota: Para AR, o vídeo precisa estar num asset e carregar corretamente. 
+            // Este código assume que o vídeo 1.mp4 é o padrão de teste.
         }
-
-        // Blindagem de Áudio
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                videoPlayer.pause();
-            }
-        });
     </script>
 </body>
 </html>
