@@ -16,6 +16,28 @@
         background: #27ae60; color: white; font-weight: bold; 
         font-family: sans-serif; cursor: pointer; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 10…
+[20:24, 27/02/2026] Maurício: https://digiart-ar.github.io/canecas02/teste/
+[20:36, 27/02/2026] Maurício: https://digiart-ar.github.io/canecas02/salmos/
+[21:52, 27/02/2026] Maurício: "2026-03-27"
+[22:08, 27/02/2026] Maurício: <!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
+      #ui { 
+        position: fixed; bottom: 30px; left: 50%; 
+        transform: translateX(-50%); z-index: 1000; 
+        width: 80%; text-align: center; 
+      }
+      button { 
+        padding: 15px 30px; border-radius: 30px; border: none; 
+        background: #27ae60; color: white; font-weight: bold; 
+        font-family: sans-serif; cursor: pointer; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
         width: 100%; max-width: 250px; font-size: 18px;
       }
       .a-enter-vr { display: none !important; }
@@ -108,132 +130,6 @@
         videoElement.muted = false;
         autorizado = true; 
         btn.style.display = 'none';
-      });
-
-      document.querySelector('a-scene').addEventListener('targetFound', () => {
-        if (autorizado && videoElement) {
-          videoElement.play();
-        }
-      });
-
-      document.querySelector('a-scene').addEventListener('targetLost', () => {
-        if (videoElement) videoElement.pause();
-      });
-    </script>
-  </body>
-</html>
-[21:52, 27/02/2026] Maurício: "2026-03-27"
-[21:58, 27/02/2026] Maurício: <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-      #ui { 
-        position: fixed; bottom: 30px; left: 50%; 
-        transform: translateX(-50%); z-index: 1000; 
-        width: 80%; text-align: center; 
-      }
-      button { 
-        padding: 15px 30px; border-radius: 30px; border: none; 
-        background: #27ae60; color: white; font-weight: bold; 
-        font-family: sans-serif; cursor: pointer; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-        width: 100%; max-width: 250px; font-size: 18px;
-      }
-      .a-enter-vr { display: none !important; }
-      #mensagem-erro {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); color: white; display: none;
-        align-items: center; justify-content: center; z-index: 2000;
-        font-family: sans-serif; text-align: center; padding: 20px;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="mensagem-erro">
-      <h2>Sua assinatura expirou.</h2>
-      <p>O prazo da sua licença terminou.</p>
-    </div>
-
-    <div id="ui">
-      <button id="play-btn">ATIVAR MÁGICA ✨</button>
-    </div>
-    
-    <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
-      color-space="sRGB" 
-      renderer="colorManagement: true, physicallyCorrectLights" 
-      vr-mode-ui="enabled: false" 
-      device-orientation-permission-ui="enabled: false">
-      
-      <a-assets id="assets-folder"></a-assets>
-
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-video id="video-screen" position="0 0 0" width="1" height="1.77" scale="1.5 1.5 1.5" rotation="0 0 0"></a-video>
-      </a-entity>
-    </a-scene>
-
-    <script>
-      const btn = document.querySelector('#play-btn');
-      const assets = document.querySelector('#assets-folder');
-      const videoScreen = document.querySelector('#video-screen');
-      const mensagemErro = document.querySelector('#mensagem-erro');
-      const scene = document.querySelector('a-scene');
-      
-      let videoElement = null;
-      let autorizado = false;
-      
-      // --- CONFIGURAÇÃO DE DATA LIMITE ---
-      // Formato: AAAA-MM-DD
-      const DATA_LIMITE = "2026-03-27"; 
-      // ------------------------------------
-
-      function verificarValidade() {
-        let hoje = new Date().toISOString().split('T')[0];
-        
-        if (hoje > DATA_LIMITE) {
-          mensagemErro.style.display = 'flex';
-          document.querySelector('#ui').style.display = 'none';
-          return false;
-        }
-        return true;
-      }
-
-      function definirVideoDoDia() {
-        let dia = new Date().getDay(); // 0 (Dom) - 6 (Sab)
-        let videoNome = (dia + 1) + ".mp4"; // 1.mp4 - 7.mp4
-        return videoNome;
-      }
-
-      btn.addEventListener('click', () => {
-        if (!verificarValidade()) return;
-
-        videoElement = document.createElement('video');
-        videoElement.setAttribute('id', 'vid');
-        
-        // --- CHAMA O VÍDEO DO DIA ---
-        videoElement.setAttribute('src', definirVideoDoDia()); 
-        // -----------------------------
-
-        videoElement.setAttribute('loop', 'true');
-        videoElement.setAttribute('crossorigin', 'anonymous');
-        videoElement.setAttribute('playsinline', 'true');
-        videoElement.setAttribute('webkit-playsinline', 'true');
-        
-        assets.appendChild(videoElement);
-        videoScreen.setAttribute('src', '#vid');
-
-        videoElement.muted = false;
-        autorizado = true; 
-        btn.style.display = 'none';
-        
-        // Inicia a câmera
-        scene.setAttribute('mindar-image', 'autoStart: true');
       });
 
       document.querySelector('a-scene').addEventListener('targetFound', () => {
