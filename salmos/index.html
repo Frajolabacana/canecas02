@@ -16,28 +16,6 @@
         background: #27ae60; color: white; font-weight: bold; 
         font-family: sans-serif; cursor: pointer; 
         box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-        width: 10…
-[20:24, 27/02/2026] Maurício: https://digiart-ar.github.io/canecas02/teste/
-[20:36, 27/02/2026] Maurício: https://digiart-ar.github.io/canecas02/salmos/
-[21:52, 27/02/2026] Maurício: "2026-03-27"
-[22:08, 27/02/2026] Maurício: <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-      #ui { 
-        position: fixed; bottom: 30px; left: 50%; 
-        transform: translateX(-50%); z-index: 1000; 
-        width: 80%; text-align: center; 
-      }
-      button { 
-        padding: 15px 30px; border-radius: 30px; border: none; 
-        background: #27ae60; color: white; font-weight: bold; 
-        font-family: sans-serif; cursor: pointer; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
         width: 100%; max-width: 250px; font-size: 18px;
       }
       .a-enter-vr { display: none !important; }
@@ -52,7 +30,7 @@
   <body>
     <div id="mensagem-erro">
       <h2>Sua assinatura expirou.</h2>
-      <p>O prazo de 30 dias terminou.</p>
+      <p>O prazo da sua licença terminou.</p>
     </div>
 
     <div id="ui">
@@ -83,22 +61,18 @@
       let videoElement = null;
       let autorizado = false;
       
-      // --- CONFIGURAÇÃO DE TEMPO ---
-      const DIAS_LIMITE = 30;
-      // -----------------------------
+      // --- CONFIGURAÇÃO DE DATA LIMITE ---
+      // Formato: AAAA-MM-DD
+      const DATA_LIMITE = "2026-03-27";
+      // ------------------------------------
 
       function verificarValidade() {
-        let dataInicio = localStorage.getItem('dataInicio');
-        if (!dataInicio) {
-          localStorage.setItem('dataInicio', new Date().getTime());
-        } else {
-          let agora = new Date().getTime();
-          let limite = parseInt(dataInicio) + (DIAS_LIMITE * 24 * 60 * 60 * 1000);
-          if (agora > limite) {
-            mensagemErro.style.display = 'flex';
-            document.querySelector('#ui').style.display = 'none';
-            return false;
-          }
+        let hoje = new Date().toISOString().split('T')[0];
+        
+        if (hoje > DATA_LIMITE) {
+          mensagemErro.style.display = 'flex';
+          document.querySelector('#ui').style.display = 'none';
+          return false;
         }
         return true;
       }
