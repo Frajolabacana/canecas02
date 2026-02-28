@@ -2,23 +2,21 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js" defer></script>
     <style>
       body { margin: 0; overflow: hidden; }
       
-      /* TELA DE TUTORIAL (NOVA) */
       #tutorial {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.85); color: white;
+        background: rgba(0,0,0,0.95); color: white;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        z-index: 2000; font-family: sans-serif; text-align: center; padding: 30px; box-sizing: border-box;
+        z-index: 2000; font-family: sans-serif; text-align: center; padding: 20px; box-sizing: border-box;
       }
 
-      /* TELA DE BLOQUEIO POR TEMPO */
       #mensagem-erro {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); color: white; display: none;
+        background: rgba(0,0,0,0.95); color: white; display: none;
         align-items: center; justify-content: center; z-index: 2000;
         font-family: sans-serif; text-align: center; padding: 20px;
       }
@@ -26,25 +24,26 @@
       #ui { 
         position: fixed; bottom: 30px; left: 50%; 
         transform: translateX(-50%); z-index: 1000; 
-        width: 100%; text-align: center; 
+        width: 100%; text-align: center; display: none;
       }
       
       button { 
-        padding: 12px 25px; /* Botão menor */
+        padding: 12px 25px;
         border-radius: 25px; border: none; 
         background: #27ae60; color: white; font-weight: bold; 
         font-family: sans-serif; cursor: pointer; 
         box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-        width: auto; max-width: 80%; font-size: 16px; /* Fonte menor */
+        width: auto; max-width: 80%; font-size: 16px;
       }
       .a-enter-vr { display: none !important; }
+      .hidden { display: none !important; }
     </style>
   </head>
   <body>
     
     <div id="tutorial">
       <h2 style="margin-top: 0;">Bem-vindo à DigiArt AR! ✨</h2>
-      <p style="font-size: 18px; line-height: 1.5;">Obrigado por adquirir um produto DigiArt. Para iniciar sua experiência, clique no botão abaixo e aponte a câmera para o objeto.</p>
+      <p style="font-size: 17px; line-height: 1.4;">Obrigado por adquirir um produto DigiArt. Para iniciar sua experiência, clique no botão abaixo e aponte a câmera para o objeto.</p>
       <button id="btn-tutorial">INICIAR EXPERIÊNCIA</button>
     </div>
 
@@ -55,10 +54,6 @@
       </div>
     </div>
 
-    <div id="ui" style="display: none;">
-      <button id="play-btn">ATIVAR CÂMERA 🎥</button>
-    </div>
-    
     <a-scene 
       id="scene"
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
@@ -79,9 +74,7 @@
 
     <script>
       const btnTutorial = document.querySelector('#btn-tutorial');
-      const btnPlay = document.querySelector('#play-btn');
       const tutorial = document.querySelector('#tutorial');
-      const ui = document.querySelector('#ui');
       const assets = document.querySelector('#assets-folder');
       const videoScreen = document.querySelector('#video-screen');
       const mensagemErro = document.querySelector('#mensagem-erro');
@@ -90,9 +83,7 @@
       let videoElement = null;
       let autorizado = false;
       
-      // --- CONFIGURAÇÃO DE TEMPO ---
       const DIAS_LIMITE = 30;
-      // -----------------------------
 
       function verificarValidade() {
         let dataInicio = localStorage.getItem('dataInicio');
@@ -104,7 +95,6 @@
           if (agora > limite) {
             mensagemErro.style.display = 'flex';
             tutorial.style.display = 'none';
-            ui.style.display = 'none';
             return false;
           }
         }
@@ -112,20 +102,22 @@
       }
 
       function definirVideoDoDia() {
-        let dia = new Date().getDay(); // 0 (Dom) - 6 (Sab)
-        let videoNome = (dia + 1) + ".mp4"; // 1.mp4 - 7.mp4
+        let dia = new Date().getDay();
+        let videoNome = (dia + 1) + ".mp4";
         return videoNome;
       }
 
       function iniciarExperiencia() {
         if (!verificarValidade()) return;
 
+        // Esconde o tutorial imediatamente
         tutorial.style.display = 'none';
-        ui.style.display = 'block'; // Mostra botão de emergência se precisar
-
-        // Inicia a AR
-        scene.setAttribute('mindar-image', 'autoStart: true');
         
+        // --- AÇÃO: Acelerador de AR ---
+        // Mostra a cena antes de iniciar para dar tempo ao navegador
+        scene.classList.remove('hidden');
+        
+        // Cria o vídeo
         videoElement = document.createElement('video');
         videoElement.setAttribute('id', 'vid');
         videoElement.setAttribute('src', definirVideoDoDia()); 
@@ -136,24 +128,24 @@
         
         assets.appendChild(videoElement);
         videoScreen.setAttribute('src', '#vid');
-
         videoElement.muted = false;
-        autorizado = true; 
-        
-        // Esconde o botão de emergência logo após iniciar
-        setTimeout(() => { ui.style.display = 'none'; }, 1000);
+        autorizado = true;
+
+        // Inicia a câmera com um pequeno delay para evitar a tela branca
+        setTimeout(() => {
+          scene.setAttribute('mindar-image', 'autoStart: true');
+        }, 300);
       }
 
       btnTutorial.addEventListener('click', iniciarExperiencia);
-      btnPlay.addEventListener('click', iniciarExperiencia);
 
-      document.querySelector('a-scene').addEventListener('targetFound', () => {
+      scene.addEventListener('targetFound', () => {
         if (autorizado && videoElement) {
           videoElement.play();
         }
       });
 
-      document.querySelector('a-scene').addEventListener('targetLost', () => {
+      scene.addEventListener('targetLost', () => {
         if (videoElement) videoElement.pause();
       });
     </script>
