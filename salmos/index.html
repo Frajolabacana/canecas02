@@ -1,48 +1,72 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
       body { margin: 0; overflow: hidden; }
-      #ui { 
-        position: fixed; bottom: 30px; left: 50%; 
-        transform: translateX(-50%); z-index: 1000; 
-        width: 80%; text-align: center; 
+      
+      /* TELA DE TUTORIAL (NOVA) */
+      #tutorial {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); color: white;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        z-index: 2000; font-family: sans-serif; text-align: center; padding: 30px; box-sizing: border-box;
       }
-      button { 
-        padding: 15px 30px; border-radius: 30px; border: none; 
-        background: #27ae60; color: white; font-weight: bold; 
-        font-family: sans-serif; cursor: pointer; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-        width: 100%; max-width: 250px; font-size: 18px;
-      }
-      .a-enter-vr { display: none !important; }
+
+      /* TELA DE BLOQUEIO POR TEMPO */
       #mensagem-erro {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.9); color: white; display: none;
         align-items: center; justify-content: center; z-index: 2000;
         font-family: sans-serif; text-align: center; padding: 20px;
       }
+      
+      #ui { 
+        position: fixed; bottom: 30px; left: 50%; 
+        transform: translateX(-50%); z-index: 1000; 
+        width: 100%; text-align: center; 
+      }
+      
+      button { 
+        padding: 12px 25px; /* Botão menor */
+        border-radius: 25px; border: none; 
+        background: #27ae60; color: white; font-weight: bold; 
+        font-family: sans-serif; cursor: pointer; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+        width: auto; max-width: 80%; font-size: 16px; /* Fonte menor */
+      }
+      .a-enter-vr { display: none !important; }
     </style>
   </head>
   <body>
-    <div id="mensagem-erro">
-      <h2>Sua assinatura expirou.</h2>
-      <p>O prazo de 30 dias terminou.</p>
+    
+    <div id="tutorial">
+      <h2 style="margin-top: 0;">Bem-vindo à DigiArt AR! ✨</h2>
+      <p style="font-size: 18px; line-height: 1.5;">Obrigado por adquirir um produto DigiArt. Para iniciar sua experiência, clique no botão abaixo e aponte a câmera para o objeto.</p>
+      <button id="btn-tutorial">INICIAR EXPERIÊNCIA</button>
     </div>
 
-    <div id="ui">
-      <button id="play-btn">ATIVAR MÁGICA ✨</button>
+    <div id="mensagem-erro">
+      <div>
+        <h2>Sua assinatura expirou.</h2>
+        <p>O prazo de 30 dias terminou.</p>
+      </div>
+    </div>
+
+    <div id="ui" style="display: none;">
+      <button id="play-btn">ATIVAR CÂMERA 🎥</button>
     </div>
     
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
+      id="scene"
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
       color-space="sRGB" 
       renderer="colorManagement: true, physicallyCorrectLights" 
       vr-mode-ui="enabled: false" 
-      device-orientation-permission-ui="enabled: false">
+      device-orientation-permission-ui="enabled: false"
+      class="hidden">
       
       <a-assets id="assets-folder"></a-assets>
 
@@ -54,10 +78,15 @@
     </a-scene>
 
     <script>
-      const btn = document.querySelector('#play-btn');
+      const btnTutorial = document.querySelector('#btn-tutorial');
+      const btnPlay = document.querySelector('#play-btn');
+      const tutorial = document.querySelector('#tutorial');
+      const ui = document.querySelector('#ui');
       const assets = document.querySelector('#assets-folder');
       const videoScreen = document.querySelector('#video-screen');
       const mensagemErro = document.querySelector('#mensagem-erro');
+      const scene = document.querySelector('a-scene');
+      
       let videoElement = null;
       let autorizado = false;
       
@@ -74,7 +103,8 @@
           let limite = parseInt(dataInicio) + (DIAS_LIMITE * 24 * 60 * 60 * 1000);
           if (agora > limite) {
             mensagemErro.style.display = 'flex';
-            document.querySelector('#ui').style.display = 'none';
+            tutorial.style.display = 'none';
+            ui.style.display = 'none';
             return false;
           }
         }
@@ -87,16 +117,18 @@
         return videoNome;
       }
 
-      btn.addEventListener('click', () => {
+      function iniciarExperiencia() {
         if (!verificarValidade()) return;
 
+        tutorial.style.display = 'none';
+        ui.style.display = 'block'; // Mostra botão de emergência se precisar
+
+        // Inicia a AR
+        scene.setAttribute('mindar-image', 'autoStart: true');
+        
         videoElement = document.createElement('video');
         videoElement.setAttribute('id', 'vid');
-        
-        // --- CHAMA O VÍDEO DO DIA ---
         videoElement.setAttribute('src', definirVideoDoDia()); 
-        // -----------------------------
-
         videoElement.setAttribute('loop', 'true');
         videoElement.setAttribute('crossorigin', 'anonymous');
         videoElement.setAttribute('playsinline', 'true');
@@ -107,8 +139,13 @@
 
         videoElement.muted = false;
         autorizado = true; 
-        btn.style.display = 'none';
-      });
+        
+        // Esconde o botão de emergência logo após iniciar
+        setTimeout(() => { ui.style.display = 'none'; }, 1000);
+      }
+
+      btnTutorial.addEventListener('click', iniciarExperiencia);
+      btnPlay.addEventListener('click', iniciarExperiencia);
 
       document.querySelector('a-scene').addEventListener('targetFound', () => {
         if (autorizado && videoElement) {
